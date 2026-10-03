@@ -25,6 +25,50 @@ export async function adminListStudents(){if(isDemo()){seedDemo();const plans=re
 export async function adminListExercises(){if(isDemo()){seedDemo();return read(KEYS.exercises)}const sb=await getSupabase();const{data,error}=await sb.from('exercises').select('*').order('name');if(error)throw error;return data}
 export async function adminSaveExercise(ex){if(isDemo()){const all=read(KEYS.exercises);const row={...ex,id:ex.id||uid(),updated_at:new Date().toISOString()};const i=all.findIndex(x=>x.id===row.id);if(i>=0)all[i]=row;else all.push(row);write(KEYS.exercises,all);return row}const sb=await getSupabase();const{data,error}=await sb.from('exercises').upsert(ex).select().single();if(error)throw error;return data}
 export async function adminSavePlan(plan){if(isDemo()){const all=read(KEYS.plans);const row={...plan,id:plan.id||uid()};const i=all.findIndex(x=>x.id===row.id);if(i>=0)all[i]=row;else all.push(row);write(KEYS.plans,all);return row}const sb=await getSupabase();const{data,error}=await sb.from('plans').upsert(plan).select().single();if(error)throw error;return data}
+
+export async function adminCreateStudent(student){
+  if(isDemo()){
+    const all=read(KEYS.students);
+    const users=read(KEYS.users);
+    if(users.some(u=>u.email.toLowerCase()===String(student.email||'').toLowerCase()))throw new Error('Ya existe un usuario con ese correo.');
+    const userId=uid();
+    const row={...student,id:uid(),user_id:userId};
+    users.push({id:userId,email:student.email,password:student.password,role:ROLES.STUDENT,full_name:student.full_name});
+    delete row.password;
+    all.push(row);
+    write(KEYS.users,users);
+    write(KEYS.students,all);
+    return row;
+  }
+  const sb=await getSupabase();
+  const payload={
+    email:String(student.email||'').trim(),
+    password:String(student.password||''),
+    full_name:String(student.full_name||'').trim(),
+    goal:student.goal||'',
+    plan_id:student.plan_id||null,
+    start_date:student.start_date||null,
+    next_payment_date:student.next_payment_date||null,
+    notes:student.notes||'',
+    active:student.active!==false
+  };
+  if(!payload.email)throw new Error('Ingresá el correo del alumno.');
+  if(payload.password.length<8)throw new Error('La contraseña temporal debe tener al menos 8 caracteres.');
+  const {data,error}=await sb.functions.invoke('create-student',{body:payload});
+  if(error){
+    let message=error.message||'No se pudo crear el alumno.';
+    try{
+      if(error.context){
+        const body=await error.context.json();
+        if(body?.error)message=body.error;
+      }
+    }catch{}
+    throw new Error(message);
+  }
+  if(data?.error)throw new Error(data.error);
+  return data?.student||data;
+}
+
 export async function adminSaveStudent(student){if(isDemo()){const all=read(KEYS.students);const row={...student,id:student.id||uid(),user_id:student.user_id||uid()};const i=all.findIndex(x=>x.id===row.id);if(i>=0)all[i]=row;else all.push(row);write(KEYS.students,all);return row}const sb=await getSupabase();const{data,error}=await sb.from('students').upsert(student).select().single();if(error)throw error;return data}
 export async function adminGetAllPayments(){if(isDemo()){const students=read(KEYS.students);return read(KEYS.payments).map(p=>({...p,student:students.find(s=>s.id===p.student_id)}))}const sb=await getSupabase();const{data,error}=await sb.from('payments').select('*,students(full_name,email)').order('due_date',{ascending:false});if(error)throw error;return data}
 export async function adminSavePayment(p){if(isDemo()){const all=read(KEYS.payments);const row={...p,id:p.id||uid()};const i=all.findIndex(x=>x.id===row.id);if(i>=0)all[i]=row;else all.push(row);write(KEYS.payments,all);return row}const sb=await getSupabase();const{data,error}=await sb.from('payments').upsert(p).select().single();if(error)throw error;return data}
