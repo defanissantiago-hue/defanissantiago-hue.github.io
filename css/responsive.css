@@ -1,1 +1,114 @@
 @media(max-width:980px){.hero-grid{grid-template-columns:1fr}.hero-art{min-height:380px}.feature-grid,.metric-grid{grid-template-columns:1fr 1fr}.plans-grid{grid-template-columns:1fr}.app-shell{grid-template-columns:78px 1fr}.sidebar{padding:14px 9px}.side-brand span:last-child,.nav-item span{display:none}.side-brand{justify-content:center}.nav-item{justify-content:center}.stat-card{grid-column:span 6}.today-card,.payment-card,.progress-card,.feedback-card{grid-column:1/-1}.auth-layout{grid-template-columns:1fr}.auth-brand{min-height:310px;padding:28px}.auth-brand h1{font-size:4rem}.auth-card{padding:40px 22px}.admin-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr 1fr}.exercise-card{grid-template-columns:150px 1fr}}@media(max-width:700px){.main-nav{display:none;position:absolute;top:68px;left:20px;right:20px;background:#101010;border:1px solid #2c2c2c;border-radius:16px;padding:15px;flex-direction:column;align-items:stretch}.main-nav.open{display:flex}.menu-toggle{display:block}.hero-grid{padding-top:50px}.hero-copy h1{font-size:3.7rem}.hero-art{min-height:320px}.hero-orb{width:280px;height:280px}.hero-scorpion{font-size:7rem}.hc1{left:0}.hc2{right:0;top:20px}.feature-grid,.metric-grid{grid-template-columns:1fr}.pt-row{grid-template-columns:1.6fr 1fr .8fr}.pt-row>*:last-child{display:none}.cta{margin:20px 18px 60px;padding:28px;flex-direction:column;align-items:flex-start}.cta>div:last-child{width:100%;flex-direction:column}.cta .btn{width:100%}footer{flex-direction:column;gap:16px;align-items:flex-start}.app-shell{display:block}.sidebar{position:fixed;left:-260px;width:250px;z-index:100;transition:.2s}.sidebar.open{left:0}.side-brand span:last-child,.nav-item span{display:inline}.nav-item{justify-content:flex-start}.mobile-only{display:grid}.app-topbar{padding:0 14px}.app-content{padding:16px}.user-chip>div:last-child{display:none}.dashboard-grid{display:block}.dash-card{margin-bottom:12px}.profile-grid,.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.routine-header{align-items:flex-start;flex-direction:column}.routine-progress{width:100%;min-width:0}.exercise-card{grid-template-columns:1fr}.exercise-media{min-height:190px}.series-row{grid-template-columns:56px 1fr 1fr 48px}.rpe-scale{grid-template-columns:repeat(5,1fr)}.feedback-actions{flex-direction:column;align-items:stretch}.finish-workout{width:100%}.history-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr}.admin-toolbar{align-items:stretch;flex-direction:column}.builder-grid{grid-template-columns:1fr 1fr}.auth-brand{min-height:250px}.auth-brand h1{font-size:3.2rem}}
+
+
+/* ==========================================================
+   SCORPION WORKOUTS — MOBILE FIX
+   Must be loaded AFTER dashboard/routine/admin/landing/auth CSS.
+   ========================================================== */
+@media (max-width:700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{min-width:0}
+
+  .app-shell{display:block!important;min-height:100dvh;width:100%}
+  .app-main{width:100%;min-width:0;max-width:100%}
+
+  .sidebar{
+    position:fixed!important;
+    top:0;bottom:0;left:-100%!important;
+    width:min(82vw,280px)!important;
+    height:100dvh!important;
+    z-index:1000!important;
+    padding:18px 14px!important;
+    box-shadow:20px 0 60px rgba(0,0,0,.55);
+    overflow-y:auto;
+  }
+  .sidebar.open{left:0!important}
+  .side-brand{justify-content:flex-start!important}
+  .side-brand span:last-child,.nav-item span{display:inline!important}
+  .nav-item{justify-content:flex-start!important;width:100%}
+
+  .mobile-only{display:grid!important;place-items:center;flex:0 0 42px}
+  .app-topbar{
+    width:100%;height:72px;padding:0 12px!important;gap:10px;
+    min-width:0;overflow:hidden
+  }
+  .app-topbar>div:nth-child(2){min-width:0;flex:1}
+  .app-topbar h1{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .app-topbar small{font-size:.58rem}
+  .user-chip{flex:0 0 auto}
+  .user-chip>div:last-child{display:none!important}
+  .avatar{width:38px;height:38px;border-radius:11px}
+
+  .app-content{
+    width:100%;max-width:100%;margin:0!important;
+    padding:14px 12px 30px!important;overflow:hidden
+  }
+
+  .dashboard-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:12px!important;
+    width:100%;
+  }
+  .dash-card,.stat-card,.today-card,.payment-card,.progress-card,.feedback-card{
+    grid-column:1/-1!important;
+    width:100%;min-width:0;margin:0!important;
+  }
+  .dash-card{padding:18px!important}
+  .stat-card strong{font-size:1.55rem!important;line-height:1.15;overflow-wrap:anywhere}
+  .today-card,.payment-card,.progress-card,.feedback-card{padding:18px!important}
+  .card-title{align-items:flex-start!important;gap:12px!important}
+  .card-title>div{min-width:0;width:100%}
+  .card-title .btn{width:100%}
+  .big-day{font-size:2.35rem!important;line-height:1.02;overflow-wrap:anywhere}
+  .payment-amount{font-size:2.1rem!important;overflow-wrap:anywhere}
+  .quick-row{gap:10px}
+  .quick-row span{min-width:0;overflow-wrap:anywhere}
+
+  .routine-header{align-items:flex-start!important;flex-direction:column!important}
+  .routine-header h2{font-size:2.35rem!important;line-height:1.03}
+  .routine-progress{width:100%!important;min-width:0!important}
+  .exercise-card{grid-template-columns:minmax(0,1fr)!important;width:100%}
+  .exercise-media{min-height:210px!important;aspect-ratio:16/10}
+  .exercise-body{padding:15px!important;min-width:0}
+  .exercise-top{flex-direction:column!important;align-items:stretch}
+  .complete-toggle{width:100%;justify-content:center}
+  .series-row{grid-template-columns:44px minmax(0,1fr) minmax(0,1fr) 40px!important;gap:5px!important}
+  .series-row input{min-width:0;padding:.58rem .35rem!important}
+  .series-check{width:38px;height:38px}
+  .rpe-scale{grid-template-columns:repeat(5,1fr)!important}
+  .workout-feedback{padding:17px!important}
+  .feedback-actions{flex-direction:column!important;align-items:stretch!important}
+  .finish-workout{width:100%;min-width:0!important}
+  .history-grid{grid-template-columns:minmax(0,1fr)!important}
+
+  .profile-grid,.form-grid{grid-template-columns:minmax(0,1fr)!important}
+  .form-grid .full{grid-column:auto!important}
+  .form-card{padding:17px!important}
+
+  .admin-toolbar{align-items:stretch!important;flex-direction:column!important}
+  .kpi-grid{grid-template-columns:minmax(0,1fr)!important}
+  .admin-grid{grid-template-columns:minmax(0,1fr)!important}
+  .admin-card{padding:16px!important;min-width:0}
+  .builder-grid{grid-template-columns:1fr 1fr!important}
+  .modal-backdrop{padding:10px!important}
+  .modal{max-height:94dvh!important;border-radius:16px!important}
+  .modal-body{padding:15px!important}
+  .modal-foot{padding:13px 15px!important;flex-wrap:wrap}
+  .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  .toast-stack{left:12px;right:12px;bottom:12px}
+  .toast{min-width:0;max-width:none;width:100%}
+}
+
+@media (max-width:390px){
+  .app-content{padding-left:9px!important;padding-right:9px!important}
+  .dash-card,.today-card,.payment-card,.progress-card,.feedback-card{padding:15px!important}
+  .stat-card strong{font-size:1.4rem!important}
+  .big-day{font-size:2rem!important}
+  .routine-header h2{font-size:2rem!important}
+  .series-row{grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) 36px!important}
+  .series-check{width:34px;height:34px}
+  .builder-grid{grid-template-columns:1fr!important}
+  .builder-grid .wide2{grid-column:auto!important}
+}
