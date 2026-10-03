@@ -1,7 +1,7 @@
 export const $=(s,p=document)=>p.querySelector(s);export const $$=(s,p=document)=>[...p.querySelectorAll(s)];
 export const escapeHTML=(value='')=>String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 export const formatMoney=(n=0)=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(n)||0);
-export const formatDate=(d)=>{if(!d)return'—';const date=new Date(d);return new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date)};
+export const formatDate=(d)=>{if(!d)return'—';const date=/^\d{4}-\d{2}-\d{2}$/.test(String(d))?new Date(`${d}T12:00:00`):new Date(d);if(Number.isNaN(date.getTime()))return'—';return new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date)};
 export const formatDateLong=(d=new Date())=>new Intl.DateTimeFormat('es-AR',{weekday:'long',day:'numeric',month:'long'}).format(new Date(d));
 export const initials=(name='')=>name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'SW';
 export const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -11,8 +11,8 @@ export const toast=(message,type='success')=>{let stack=$('.toast-stack');if(!st
 export const loadingHTML=(text='Cargando...')=>`<div class="loading"><div><div class="spinner"></div><p>${escapeHTML(text)}</p></div></div>`;
 export const emptyHTML=(title='Sin datos',text='Todavía no hay información para mostrar.')=>`<div class="empty-state"><h3>${escapeHTML(title)}</h3><p>${escapeHTML(text)}</p></div>`;
 export const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
-export const dateISO=(d=new Date())=>new Date(d).toISOString().slice(0,10);
-export const monthISO=(d=new Date())=>new Date(d).toISOString().slice(0,7);
+export const dateISO=(d=new Date())=>{const v=new Date(d);return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}-${String(v.getDate()).padStart(2,'0')}`};
+export const monthISO=(d=new Date())=>dateISO(d).slice(0,7);
 export const parseNumber=v=>Number(String(v??'').replace(',','.'))||0;
 export const setBusy=(btn,busy,label='Procesando...')=>{if(!btn)return;if(busy){btn.dataset.old=btn.innerHTML;btn.disabled=true;btn.innerHTML=label}else{btn.disabled=false;btn.innerHTML=btn.dataset.old||btn.innerHTML}};
 export const qs=(obj={})=>new URLSearchParams(obj).toString();

@@ -1,3 +1,5 @@
+> **Actualización 03/10/2026:** leer primero `LEEME_PRIMERO.md`. Para la base existente aplicar únicamente `sql/005_v1_patch.sql`; no repetir la instalación inicial que se describe debajo.
+
 # SCORPION WORKOUTS
 
 Aplicación web para coaching fitness con landing, autenticación, panel privado, rutinas visuales, registro de series/peso/reps, completado con tilde, RPE 1–10, comentarios, progreso, planes y pagos.
