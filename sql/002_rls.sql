@@ -1,0 +1,26 @@
+-- ROW LEVEL SECURITY: alumno solo ve lo suyo; entrenador administra todo.
+alter table public.profiles enable row level security;alter table public.plans enable row level security;alter table public.students enable row level security;alter table public.exercises enable row level security;alter table public.routines enable row level security;alter table public.routine_days enable row level security;alter table public.routine_exercises enable row level security;alter table public.exercise_logs enable row level security;alter table public.workout_feedback enable row level security;alter table public.payments enable row level security;
+create or replace function public.is_staff() returns boolean language sql stable security definer set search_path=public as $$select exists(select 1 from public.profiles p where p.id=auth.uid() and p.role in('admin','coach'));$$;
+create or replace function public.my_student_id() returns uuid language sql stable security definer set search_path=public as $$select s.id from public.students s where s.user_id=auth.uid() limit 1;$$;
+drop policy if exists profiles_self on public.profiles;create policy profiles_self on public.profiles for select using(id=auth.uid() or public.is_staff());
+drop policy if exists profiles_staff on public.profiles;create policy profiles_staff on public.profiles for all using(public.is_staff()) with check(public.is_staff());
+drop policy if exists plans_public on public.plans;create policy plans_public on public.plans for select using(active=true or public.is_staff());
+drop policy if exists plans_staff on public.plans;create policy plans_staff on public.plans for all using(public.is_staff()) with check(public.is_staff());
+drop policy if exists students_self on public.students;create policy students_self on public.students for select using(user_id=auth.uid() or public.is_staff());
+drop policy if exists students_staff on public.students;create policy students_staff on public.students for all using(public.is_staff()) with check(public.is_staff());
+drop policy if exists exercises_read on public.exercises;create policy exercises_read on public.exercises for select using(auth.uid() is not null);
+drop policy if exists exercises_staff on public.exercises;create policy exercises_staff on public.exercises for all using(public.is_staff()) with check(public.is_staff());
+drop policy if exists routines_self on public.routines;create policy routines_self on public.routines for select using(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists routines_staff on public.routines;create policy routines_staff on public.routines for all using(public.is_staff()) with check(public.is_staff());
+drop policy if exists days_read on public.routine_days;create policy days_read on public.routine_days for select using(public.is_staff() or exists(select 1 from public.routines r where r.id=routine_id and r.student_id=public.my_student_id()));
+drop policy if exists days_staff on public.routine_days;create policy days_staff on public.routine_days for all using(public.is_staff()) with check(public.is_staff());
+drop policy if exists rex_read on public.routine_exercises;create policy rex_read on public.routine_exercises for select using(public.is_staff() or exists(select 1 from public.routine_days d join public.routines r on r.id=d.routine_id where d.id=routine_day_id and r.student_id=public.my_student_id()));
+drop policy if exists rex_staff on public.routine_exercises;create policy rex_staff on public.routine_exercises for all using(public.is_staff()) with check(public.is_staff());
+drop policy if exists logs_self_select on public.exercise_logs;create policy logs_self_select on public.exercise_logs for select using(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists logs_self_insert on public.exercise_logs;create policy logs_self_insert on public.exercise_logs for insert with check(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists logs_self_update on public.exercise_logs;create policy logs_self_update on public.exercise_logs for update using(student_id=public.my_student_id() or public.is_staff()) with check(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists feedback_self_select on public.workout_feedback;create policy feedback_self_select on public.workout_feedback for select using(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists feedback_self_insert on public.workout_feedback;create policy feedback_self_insert on public.workout_feedback for insert with check(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists feedback_self_update on public.workout_feedback;create policy feedback_self_update on public.workout_feedback for update using(student_id=public.my_student_id() or public.is_staff()) with check(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists payments_self on public.payments;create policy payments_self on public.payments for select using(student_id=public.my_student_id() or public.is_staff());
+drop policy if exists payments_staff on public.payments;create policy payments_staff on public.payments for all using(public.is_staff()) with check(public.is_staff());

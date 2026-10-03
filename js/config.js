@@ -1,0 +1,9 @@
+export const CONFIG = {
+  SUPABASE_URL: 'REEMPLAZAR_CON_TU_SUPABASE_URL',
+  SUPABASE_ANON_KEY: 'REEMPLAZAR_CON_TU_SUPABASE_ANON_KEY',
+  DEMO_MODE: true,
+  APP_NAME: 'Scorpion Workouts',
+  CURRENCY: 'ARS',
+  LOCALE: 'es-AR',
+  STORAGE_BUCKET: 'exercise-videos'
+};

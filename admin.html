@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="es"><head><title>Admin | Scorpion Workouts</title><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
+<meta name="description" content="Scorpion Workouts - entrenamiento personalizado, rutinas, progreso y seguimiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css"><link rel="stylesheet" href="css/dashboard.css"><link rel="stylesheet" href="css/admin.css"><link rel="stylesheet" href="css/routine.css"></head>
+<body data-page="admin"><div class="app-shell admin-shell"><aside class="sidebar" id="sidebar"><a class="brand side-brand" href="admin.html"><span class="brand-mark">🦂</span><span>SCORPION</span></a><nav><button class="nav-item active" data-view="dashboard">⌂ <span>Dashboard</span></button><button class="nav-item" data-view="students">♟ <span>Alumnos</span></button><button class="nav-item" data-view="routines">▦ <span>Rutinas</span></button><button class="nav-item" data-view="exercises">▶ <span>Ejercicios</span></button><button class="nav-item" data-view="plans">★ <span>Planes</span></button><button class="nav-item" data-view="payments">$ <span>Pagos</span></button><button class="nav-item" data-view="settings">⚙ <span>Configuración</span></button></nav><div class="sidebar-bottom"><button class="nav-item" id="logoutBtn">⇥ <span>Salir</span></button></div></aside><main class="app-main"><header class="app-topbar"><button class="icon-btn mobile-only" id="sideToggle">☰</button><div><small>PANEL DE ENTRENADOR</small><h1 id="viewTitle">Dashboard</h1></div><div class="user-chip"><div class="avatar">🦂</div><div><strong id="adminName">Entrenador</strong><small>Administrador</small></div></div></header><div class="app-content" id="appContent"></div></main></div><div id="modalRoot"></div><script type="module" src="js/admin-app.js"></script></body></html>
