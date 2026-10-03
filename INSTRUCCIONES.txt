@@ -1,0 +1,8 @@
+SCORPION WORKOUTS - ARREGLO CELULAR
+
+1) En la raiz de GitHub reemplaza: app.html, admin.html, index.html, login.html y reset.html.
+2) Dentro de la carpeta css reemplaza responsive.css.
+3) Hace Commit changes.
+4) En el celular cerra/abri la pagina o recarga borrando cache.
+
+El cambio principal es que responsive.css ahora carga al final, por lo que las reglas de celular ya no son pisadas por dashboard.css/routine.css/admin.css.
