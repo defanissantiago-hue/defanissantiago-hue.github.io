@@ -1,3 +1,9 @@
+# ACTUALIZACIÓN V2 DISPONIBLE
+
+Para esta entrega, seguí **ACTUALIZAR_V2.md** y ejecutá **sql/007_v2_features.sql** antes de subir los archivos. Conservamos debajo las instrucciones de la versión anterior como referencia; no repitas las migraciones ya aplicadas.
+
+---
+
 # Scorpion Workouts — revisión del 3 de octubre de 2026
 
 Este paquete corrige el ZIP actual de GitHub. No se publicó la web ni se modificó tu Supabase.

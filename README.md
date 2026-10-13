@@ -1,3 +1,5 @@
+> **Entrega v2:** empezá por [ACTUALIZAR_V2.md](ACTUALIZAR_V2.md). Para la base existente, aplicá 007 después de 005. El resto de este README documenta el proyecto original.
+
 > **Actualización 03/10/2026:** leer primero `LEEME_PRIMERO.md`. Para la base existente aplicar únicamente `sql/005_v1_patch.sql`; no repetir la instalación inicial que se describe debajo.
 
 # SCORPION WORKOUTS
