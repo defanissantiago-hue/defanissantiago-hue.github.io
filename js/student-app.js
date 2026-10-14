@@ -15,7 +15,7 @@ async function boot(){
  if(hasAccess(student)){routine=await getStudentRoutine(student.id);currentDay=selectTrainingDay(routine,await getStudentHistory(student.id))}
  watchQuote();await render(location.hash==='#routine'?'routine':'home');
 }
-async function refreshAccess(){student=await getStudentByUser(user.id);const allowed=hasAccess(student);$$('.nav-item[data-view]').forEach(b=>b.hidden=!allowed&&b.dataset.view!=='payments');if(!allowed){routine=null;currentDay=null}return allowed}
+async function refreshAccess(){student=await getStudentByUser(user.id);const allowed=hasAccess(student);$$('.nav-item[data-view]').forEach(b=>b.hidden=!allowed&&b.dataset.view!=='payments');if(!allowed){routine=null;currentDay=null;$$('.nav-item[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view==='payments'))}return allowed}
 async function restrictedView(){
  $('#viewTitle').textContent='Regularizar pago';await paymentsView();
  root.insertAdjacentHTML('afterbegin',`<section class="card blocked-notice"><span class="eyebrow">ACCESO RESTRINGIDO</span><h2>${student?.payment_blocked?'Tu acceso está bloqueado por falta de pago':'Tu cuenta está inactiva'}</h2><p>${student?.payment_blocked?'Podés consultar tu deuda y pagar aquí. Tu entrenador restablecerá el acceso cuando confirme el pago.':'Contactá a tu entrenador para reactivar el acceso.'}</p><p>Tus rutinas y tu historial se conservan.</p></section>`);

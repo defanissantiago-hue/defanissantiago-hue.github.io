@@ -136,7 +136,7 @@ export async function saveSetting(key,value){
 }
 export async function setStudentBlocked(id,blocked){
  if(isDemo()){const all=read(KEYS.students);const s=all.find(s=>s.id===id);if(!s)throw new Error('Alumno inexistente');s.payment_blocked=blocked;write(KEYS.students,all);return}
- const sb=await getSupabase();const{error}=await sb.from('students').update({payment_blocked:blocked}).eq('id',id);if(error)throw error;
+ const sb=await getSupabase();const{data,error}=await sb.from('students').update({payment_blocked:Boolean(blocked)}).eq('id',id).select('id,payment_blocked').maybeSingle();if(error)throw error;if(!data)throw new Error('No se pudo cambiar el bloqueo. Revisá que seas administrador y que el alumno exista.');return data;
 }
 export async function uploadMedia(file,scope='routine'){
  const types=['image/png','image/jpeg','image/webp','image/gif','video/mp4','video/webm'];

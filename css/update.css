@@ -59,3 +59,11 @@ input[type=file]{font-size:.8rem;min-width:0}.sm-btn,.btn{touch-action:manipulat
 body[data-page=landing]::before{opacity:.12}
 body[data-page=landing] .feature,body[data-page=landing] .faq-item{background:rgba(14,14,14,.86)}
 @media(max-width:700px){.preview-head{flex-direction:column;align-items:flex-start;gap:12px}.preview-head h2{font-size:2.1rem}.pt-row>*{padding:12px 7px;font-size:.75rem}.preview-shell{padding:18px}.hero-grid{gap:20px}}
+
+/* Administración de alumnos: las tres señales se distinguen también por texto. */
+.student-table .actions{display:flex;flex-wrap:wrap;gap:7px;min-width:140px}
+.student-table .status-light{min-width:155px;white-space:nowrap}
+.student-table .status-light::before{width:11px;height:11px}
+.student-table .sm-btn.red{border-color:#b83747;color:#ff8795}
+.student-table .sm-btn.red:hover{background:rgba(184,55,71,.16)}
+@media(max-width:700px){.student-table .actions{min-width:0}.student-table td:nth-child(4)::before{content:'Estado:';display:block;color:#888;margin-bottom:7px}.student-table td:nth-child(3)::before{content:'Próximo pago: ';color:#888}}
