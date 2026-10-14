@@ -1,3 +1,4 @@
+import{methodOf,METHOD_LABELS,methodDescription}from'./training-methods.js';
 import{resolveMedia}from'./db.js';
 import{dateISO}from'./utils.js';
 let ready;
@@ -20,6 +21,7 @@ export async function downloadRoutinePDF(routine,student){
  if(d.weekday!==null&&d.weekday!==undefined)write(['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][d.weekday],10,regular,muted);
  for(const [i,ex]of(d.exercises||[]).entries()){
  if(y<120)newPage();write(`${i+1}. ${ex.name}`,12,bold);write(`${ex.sets} series · ${ex.reps} repeticiones · ${ex.rest_seconds||0} segundos de descanso`);
+ if(methodOf(ex)!=='normal'){write('Método: '+METHOD_LABELS[methodOf(ex)],10,bold,red);write(methodDescription(ex),10,regular,muted)}
  if(ex.notes)write('Notas: '+ex.notes,10);if(ex.instructions)write(ex.instructions,10,regular,muted);
  if(ex.image_url){try{const url=await resolveMedia(ex.image_url);const response=await fetch(url);if(!response.ok)throw Error();const bytes=await response.arrayBuffer();const mime=response.headers.get('content-type')||'';let img;if(mime.includes('png'))img=await doc.embedPng(bytes);else if(mime.includes('jpeg')||mime.includes('jpg'))img=await doc.embedJpg(bytes);else{const temp=URL.createObjectURL(new Blob([bytes],{type:mime}));try{const im=new Image();im.src=temp;await im.decode();const c=document.createElement('canvas');const factor=Math.min(1,1000/Math.max(im.naturalWidth,im.naturalHeight));c.width=Math.max(1,Math.round(im.naturalWidth*factor));c.height=Math.max(1,Math.round(im.naturalHeight*factor));c.getContext('2d').drawImage(im,0,0,c.width,c.height);img=await doc.embedPng(c.toDataURL('image/png'))}finally{URL.revokeObjectURL(temp)}};const scale=Math.min(130/img.width,105/img.height);const w=img.width*scale,h=img.height*scale;if(y-h<65)newPage();page.drawImage(img,{x:42,y:y-h,width:w,height:h});y-=h+10}catch{skippedImages++}}
  if(ex.video_url){const link=new URL('app.html',location.href).href+'#routine';if(y<90)newPage();page.drawText('Ver video en mi panel',{x:42,y,size:10,font:bold,color:red});const annotation=doc.context.register(doc.context.obj({Type:'Annot',Subtype:'Link',Rect:[42,y-3,160,y+12],Border:[0,0,0],A:{Type:'Action',S:'URI',URI:PDFString.of(link)}}));page.node.addAnnot(annotation);y-=23}y-=5;

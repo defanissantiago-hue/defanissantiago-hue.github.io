@@ -1,5 +1,6 @@
+import{setRows}from'./training-methods.js';
 import{escapeHTML,formatDate,dateISO,groupBy,emptyHTML}from'./utils.js';
-export function exerciseDone(ex,logs){const sets=Number(ex.sets)||1;return Array.from({length:sets},(_,i)=>i+1).every(n=>logs.some(l=>String(l.routine_exercise_id)===String(ex.id)&&Number(l.set_number)===n&&l.completed));}
+export function exerciseDone(ex,logs){return setRows(ex).every(({number:n})=>logs.some(l=>String(l.routine_exercise_id)===String(ex.id)&&Number(l.set_number)===n&&l.completed));}
 export function nextPayment(payments){return payments.filter(p=>p.status!=='paid').sort((a,b)=>a.due_date.localeCompare(b.due_date))[0]||null;}
 export function paymentState(p){return p.status!=='paid'&&p.due_date<dateISO()?'overdue':p.status;}
 export function historyHTML(history){

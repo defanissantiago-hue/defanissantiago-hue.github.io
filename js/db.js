@@ -1,3 +1,4 @@
+import{validateTrainingDay}from'./training-methods.js';
 import {CONFIG} from './config.js';import {DEFAULT_PLANS,ROLES,PAYMENT_STATUS} from './constants.js';import {uid,dateISO} from './utils.js';
 let supabase=null,supabaseReady=null;
 const hasRealConfig=()=>!CONFIG.DEMO_MODE&&CONFIG.SUPABASE_URL.startsWith('http')&&!CONFIG.SUPABASE_ANON_KEY.startsWith('REEMPLAZAR');
@@ -87,6 +88,7 @@ export async function adminSaveRoutine(routine){if(isDemo()){const all=read(KEYS
 export async function adminSaveRoutineFull(routine){
  if(!routine.student_id||!routine.name?.trim()||!routine.days?.length||routine.days.some(d=>!d.title?.trim()||!d.exercises?.length))throw new Error('Completá el nombre, alumno y al menos un ejercicio por día.');
  if(routine.days.some(d=>d.exercises.some(ex=>!Number.isInteger(Number(ex.sets))||Number(ex.sets)<1||Number(ex.sets)>50||!String(ex.reps||'').trim()||Number(ex.rest_seconds)<0)))throw new Error('Revisá series, repeticiones y descansos.');
+ for(const day of routine.days)validateTrainingDay(day);
  if(isDemo()){
   const all=read(KEYS.routines),old=all.find(r=>r.student_id===routine.student_id&&r.active);
   if(routine.id&&(!old||old.id!==routine.id))throw new Error('La rutina fue modificada. Actualizá y volvé a intentar.');
@@ -101,7 +103,7 @@ export async function adminSaveRoutineFull(routine){
    const prevEx=reuse?prior.exercises||[]:[];
    const currentExercises=day.exercises.map((ex,pos)=>{
     const oldEx=prevEx.find(e=>e.id===ex.id&&!e.retired);
-    const changed=oldEx&&['exercise_id','name','sets','reps','rest_seconds','notes','video_url','image_url','position'].some(k=>String(oldEx[k]??'')!==String((k==='position'?pos:ex[k])??''));
+    const changed=oldEx&&(['exercise_id','name','sets','reps','rest_seconds','notes','video_url','image_url','position','training_method','group_key'].some(k=>String(oldEx[k]??'')!==String((k==='position'?pos:ex[k])??''))||JSON.stringify(oldEx.method_config||{})!==JSON.stringify(ex.method_config||{}));
     const keep=oldEx&&!(changed&&rows.some(l=>l.routine_exercise_id===oldEx.id));
     return {...ex,id:keep?oldEx.id:uid(),position:pos,retired:false};
    });
