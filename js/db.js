@@ -15,8 +15,8 @@ export async function requestPasswordReset(email){if(isDemo())return true;const 
 export async function updatePassword(password){if(isDemo())return true;const sb=await getSupabase();const{error}=await sb.auth.updateUser({password});if(error)throw error;return true}
 export async function getPlans(){if(isDemo()){seedDemo();return read(KEYS.plans)}const sb=await getSupabase();const{data,error}=await sb.from('plans').select('*').eq('active',true).order('sort_order');if(error)throw error;return data}
 export async function getStudentByUser(userId){if(isDemo()){seedDemo();const s=read(KEYS.students).find(x=>x.user_id===userId);return s?{...s,plans:read(KEYS.plans).find(p=>p.id===s.plan_id)}:null}const sb=await getSupabase();const{data,error}=await sb.from('students').select('*,plans(*)').eq('user_id',userId).maybeSingle();if(error)throw error;return data}
-export async function getStudentRoutine(studentId){if(isDemo()){seedDemo();return read(KEYS.routines).find(r=>r.student_id===studentId&&r.active)||null}const sb=await getSupabase();const{data,error}=await sb.from('routines').select('*,routine_days(*,routine_exercises(*,exercises(*)))').eq('student_id',studentId).eq('active',true).order('created_at',{ascending:false}).limit(1).maybeSingle();if(error)throw error;return normalizeRoutine(data)}
-function normalizeRoutine(r){if(!r)return null;return{...r,days:(r.routine_days||[]).sort((a,b)=>a.day_number-b.day_number).map(d=>({...d,exercises:(d.routine_exercises||[]).sort((a,b)=>a.position-b.position).map(x=>({...x,name:x.exercises?.name||x.name,video_url:x.video_url||x.exercises?.video_url,image_url:x.image_url||x.exercises?.image_url,instructions:x.exercises?.instructions||''}))}))}}
+export async function getStudentRoutine(studentId){if(isDemo()){seedDemo();return normalizeRoutine(read(KEYS.routines).find(r=>r.student_id===studentId&&r.active))}const sb=await getSupabase();const{data,error}=await sb.from('routines').select('*,routine_days(*,routine_exercises(*,exercises(*)))').eq('student_id',studentId).eq('active',true).order('created_at',{ascending:false}).limit(1).maybeSingle();if(error)throw error;return normalizeRoutine(data)}
+function normalizeRoutine(r){if(!r)return null;return{...r,days:(r.days||r.routine_days||[]).filter(d=>d.retired!==true).sort((a,b)=>a.day_number-b.day_number).map(d=>({...d,exercises:(d.exercises||d.routine_exercises||[]).filter(x=>x.retired!==true).sort((a,b)=>a.position-b.position).map(x=>({...x,name:x.exercises?.name||x.name,video_url:x.video_url||x.exercises?.video_url,image_url:x.image_url||x.exercises?.image_url,instructions:x.exercises?.instructions||''}))}))}}
 export async function getLogs(studentId,date=dateISO()){if(isDemo())return read(KEYS.logs).filter(x=>x.student_id===studentId&&x.workout_date===date);const sb=await getSupabase();const{data,error}=await sb.from('exercise_logs').select('*').eq('student_id',studentId).eq('workout_date',date);if(error)throw error;return data}
 export async function saveExerciseLog(log){if(isDemo()){const all=read(KEYS.logs);const idx=all.findIndex(x=>x.student_id===log.student_id&&x.workout_date===log.workout_date&&x.routine_exercise_id===log.routine_exercise_id&&x.set_number===log.set_number);const row={...log,id:idx>=0?all[idx].id:uid(),updated_at:new Date().toISOString()};if(idx>=0)all[idx]=row;else all.push(row);write(KEYS.logs,all);return row}const sb=await getSupabase();const{data,error}=await sb.from('exercise_logs').upsert(log,{onConflict:'student_id,workout_date,routine_exercise_id,set_number'}).select().single();if(error)throw error;return data}
 export async function saveFeedback(row){if(isDemo()){const all=read(KEYS.feedback);const idx=all.findIndex(x=>x.student_id===row.student_id&&x.workout_date===row.workout_date&&x.routine_day_id===row.routine_day_id);const v={...row,id:idx>=0?all[idx].id:uid(),updated_at:new Date().toISOString()};if(idx>=0)all[idx]=v;else all.push(v);write(KEYS.feedback,all);return v}const sb=await getSupabase();const{data,error}=await sb.from('workout_feedback').upsert(row,{onConflict:'student_id,workout_date,routine_day_id'}).select().single();if(error)throw error;return data}
@@ -82,18 +82,41 @@ export async function adminSaveStudent(student){
 
 export async function adminGetAllPayments(){if(isDemo()){const students=read(KEYS.students);return read(KEYS.payments).map(p=>({...p,student:students.find(s=>s.id===p.student_id)}))}const sb=await getSupabase();const{data,error}=await sb.from('payments').select('*,students(full_name,email)').order('due_date',{ascending:false});if(error)throw error;return data}
 export async function adminSavePayment(p){if(isDemo()){const all=read(KEYS.payments);const row={...p,id:p.id||uid()};const i=all.findIndex(x=>x.id===row.id);if(i>=0)all[i]=row;else all.push(row);write(KEYS.payments,all);return row}const sb=await getSupabase();const {student,students,...row}=p;const{data,error}=await sb.from('payments').upsert(row).select().single();if(error)throw error;return data}
-export async function adminListRoutines(){if(isDemo())return read(KEYS.routines);const sb=await getSupabase();const{data,error}=await sb.from('routines').select('*,students(full_name),routine_days(*,routine_exercises(*,exercises(*)))').order('created_at',{ascending:false});if(error)throw error;return data.map(normalizeRoutine)}
+export async function adminListRoutines(){if(isDemo())return read(KEYS.routines).filter(r=>r.active).map(normalizeRoutine);const sb=await getSupabase();const{data,error}=await sb.from('routines').select('*,students(full_name),routine_days(*,routine_exercises(*,exercises(*)))').eq('active',true).order('created_at',{ascending:false});if(error)throw error;return data.map(normalizeRoutine)}
 export async function adminSaveRoutine(routine){if(isDemo()){const all=read(KEYS.routines);const row={...routine,id:routine.id||uid(),created_at:routine.created_at||new Date().toISOString()};const i=all.findIndex(x=>x.id===row.id);if(i>=0)all[i]=row;else all.push(row);write(KEYS.routines,all);return row}throw new Error('Para guardar rutinas complejas en Supabase usá adminSaveRoutineFull()')}
 export async function adminSaveRoutineFull(routine){
  if(!routine.student_id||!routine.name?.trim()||!routine.days?.length||routine.days.some(d=>!d.title?.trim()||!d.exercises?.length))throw new Error('Completá el nombre, alumno y al menos un ejercicio por día.');
  if(routine.days.some(d=>d.exercises.some(ex=>!Number.isInteger(Number(ex.sets))||Number(ex.sets)<1||Number(ex.sets)>50||!String(ex.reps||'').trim()||Number(ex.rest_seconds)<0)))throw new Error('Revisá series, repeticiones y descansos.');
  if(isDemo()){
-  const all=read(KEYS.routines);all.forEach(r=>{if(r.student_id===routine.student_id)r.active=false});
-  const row={...routine,id:uid(),active:true,created_at:new Date().toISOString(),days:routine.days.map(d=>({...d,id:uid(),exercises:d.exercises.map(ex=>({...ex,id:uid()}))}))};
-  all.push(row);write(KEYS.routines,all);return row;
+  const all=read(KEYS.routines),old=all.find(r=>r.student_id===routine.student_id&&r.active);
+  if(routine.id&&(!old||old.id!==routine.id))throw new Error('La rutina fue modificada. Actualizá y volvé a intentar.');
+  if(!routine.id&&old)throw new Error('Este alumno ya tiene una rutina: usá Editar para modificarla.');
+  const rows=read(KEYS.logs),comments=read(KEYS.feedback);
+  const previousDays=old?.days||[];
+  const updatedDays=routine.days.map((day,i)=>{
+   const prior=previousDays.find(d=>d.id===day.id&&!d.retired);
+   const hasHistory=prior&&(rows.some(l=>l.routine_day_id===prior.id||prior.exercises?.some(ex=>ex.id===l.routine_exercise_id))||comments.some(f=>f.routine_day_id===prior.id));
+   const changedDay=prior&&(prior.title!==day.title||prior.day_number!==i+1||(prior.weekday??null)!==(day.weekday??null));
+   const reuse=prior&&!(changedDay&&hasHistory),dayId=reuse?prior.id:uid();
+   const prevEx=reuse?prior.exercises||[]:[];
+   const currentExercises=day.exercises.map((ex,pos)=>{
+    const oldEx=prevEx.find(e=>e.id===ex.id&&!e.retired);
+    const changed=oldEx&&['exercise_id','name','sets','reps','rest_seconds','notes','video_url','image_url','position'].some(k=>String(oldEx[k]??'')!==String((k==='position'?pos:ex[k])??''));
+    const keep=oldEx&&!(changed&&rows.some(l=>l.routine_exercise_id===oldEx.id));
+    return {...ex,id:keep?oldEx.id:uid(),position:pos,retired:false};
+   });
+   const activeExIds=new Set(currentExercises.map(e=>e.id));
+   const oldWithHistory=prevEx.filter(ex=>!activeExIds.has(ex.id)&&rows.some(l=>l.routine_exercise_id===ex.id)).map(ex=>({...ex,retired:true}));
+   return {...day,id:dayId,day_number:i+1,retired:false,exercises:[...currentExercises,...oldWithHistory]};
+  });
+  const activeDayIds=new Set(updatedDays.map(d=>d.id));
+  const preserved=previousDays.filter(d=>!activeDayIds.has(d.id)&&(rows.some(l=>l.routine_day_id===d.id||d.exercises?.some(ex=>ex.id===l.routine_exercise_id))||comments.some(f=>f.routine_day_id===d.id))).map(d=>({...d,retired:true}));
+  const saved={...old,...routine,id:old?.id||uid(),student_id:routine.student_id,active:true,created_at:old?.created_at||new Date().toISOString(),days:[...updatedDays,...preserved]};
+  if(old)all[all.indexOf(old)]=saved;else all.push(saved);
+  write(KEYS.routines,all);return normalizeRoutine(saved);
  }
- const sb=await getSupabase();const{data,error}=await sb.rpc('save_routine_version',{payload:routine});
- if(error)throw new Error(error.code==='PGRST202'?'Falta aplicar sql/005_v1_patch.sql en Supabase.':error.message);return data;
+ const sb=await getSupabase();const{data,error}=await sb.rpc('save_routine_in_place',{payload:routine});
+ if(error)throw new Error(error.code==='PGRST202'?'Falta aplicar sql/008_edicion_rutinas.sql en Supabase.':error.message);return data;
 }
 export async function getStudentHistory(studentId){if(isDemo()){const allEx=read(KEYS.routines).flatMap(r=>(r.days||[]).flatMap(d=>d.exercises||[]));const logs=read(KEYS.logs).filter(x=>x.student_id===studentId).map(l=>({...l,routine_exercises:allEx.find(ex=>ex.id===l.routine_exercise_id)}));const fb=read(KEYS.feedback).filter(x=>x.student_id===studentId);return{logs,feedback:fb}}const sb=await getSupabase();
  const pageAll=async(table,columns)=>{const rows=[];for(let offset=0;;offset+=1000){const{data,error}=await sb.from(table).select(columns).eq('student_id',studentId).order('workout_date',{ascending:false}).order('id').range(offset,offset+999);if(error)throw error;rows.push(...data);if(data.length<1000)return rows}};
