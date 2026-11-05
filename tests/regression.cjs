@@ -37,6 +37,6 @@ async function load(demo=true,sb={}){
  check('joined relations omitted from database writes',()=>{assert.equal('plans' in writes[0].row,false);assert.equal('students' in writes[1].row,false);assert.equal('student' in writes[1].row,false)});
  await prod.adminSaveRoutineFull({...r});check('production saves using atomic RPC',()=>{assert.equal(rpc[0].name,'save_routine_in_place');assert.equal(rpc[0].args.payload.student_id,student.id)});
  await assert.rejects(()=>prod.adminSaveRoutineFull({student_id:'s',name:'Empty',days:[]}),/Completá/);passed++;console.log('PASS empty routine rejected');
- sb.rpc=async()=>({error:{code:'PGRST202',message:'missing'}});await assert.rejects(()=>prod.adminSaveRoutineFull(r),/005_v1_patch/);passed++;console.log('PASS missing migration produces explicit error');
+ sb.rpc=async()=>({error:{code:'PGRST202',message:'missing'}});await assert.rejects(()=>prod.adminSaveRoutineFull(r),/008_edicion_rutinas/);passed++;console.log('PASS missing migration produces explicit error');
  console.log(`\n${passed} regression checks passed. SQL/live auth/browser not covered.`);
 })().catch(e=>{console.error(e);process.exit(1)});
