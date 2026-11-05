@@ -28,15 +28,15 @@ async function load(demo=true,sb={}){
  await db.saveExerciseLog(log);await db.saveExerciseLog({...log,weight:55});
  check('saving same set updates instead of duplicating',()=>assert.equal(JSON.parse(data.get('sw_demo_logs')).length,1));
  await db.adminSaveRoutineFull({...r,name:'Version 2'});const active=await db.getStudentRoutine(student.id),history=await db.getStudentHistory(student.id);
- check('routine edit keeps history and changes active version',()=>{assert.notEqual(active.id,r.id);assert.equal(history.logs.length,1);assert.equal(history.logs[0].weight,55);assert.equal(history.logs[0].routine_exercises.name,'Press');assert.equal(JSON.parse(data.get('sw_demo_routines')).filter(r=>r.student_id===student.id&&r.active).length,1)});
+ check('routine edit keeps stable routine ID, updates content and preserves history',()=>{assert.equal(active.id,r.id);assert.equal(active.name,'Version 2');assert.equal(history.logs.length,1);assert.equal(history.logs[0].weight,55);assert.equal(history.logs[0].routine_exercises.name,'Press');assert.equal(JSON.parse(data.get('sw_demo_routines')).filter(r=>r.student_id===student.id&&r.active).length,1)});
  check('history contains RPE, comment and safe HTML',()=>{const html=w.historyHTML({...history,feedback:[{...first,comment:'<script>bad</script>'}]});assert.ok(html.includes('7/10'));assert.ok(html.includes('55'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'))});
  let writes=[],rpc=[];const profile={id:'admin-id',role:'admin',full_name:'Admin'};
  const sb={auth:{signInWithPassword:async()=>({data:{user:{id:'admin-id'}},error:null}),getUser:async()=>({data:{user:{id:'admin-id'}}}),signOut:async()=>({error:null})},from(table){const q={select(){return q},eq(){return q},upsert(row){writes.push({table,row});return q},update(row){writes.push({table,row});return q},insert(row){writes.push({table,row});return q},single:async()=>({data:table==='profiles'?profile:{id:'ok'},error:null})};return q},rpc:async(name,args)=>{rpc.push({name,args});return{data:{id:'new'},error:null}}};
  const prod=(await load(false,sb)).db;const logged=await prod.signIn('a@b.test','password');check('real login resolves profile role',()=>assert.equal(logged.user.role,'admin'));
  await prod.adminSaveStudent({id:'s',full_name:'A',plans:{name:'Pro'}});await prod.adminSavePayment({id:'p',amount:20,students:{full_name:'A'},student:{name:'A'}});
  check('joined relations omitted from database writes',()=>{assert.equal('plans' in writes[0].row,false);assert.equal('students' in writes[1].row,false);assert.equal('student' in writes[1].row,false)});
- await prod.adminSaveRoutineFull({...r});check('production saves using atomic RPC',()=>{assert.equal(rpc[0].name,'save_routine_version');assert.equal(rpc[0].args.payload.student_id,student.id)});
+ await prod.adminSaveRoutineFull({...r});check('production saves using atomic RPC',()=>{assert.equal(rpc[0].name,'save_routine_in_place');assert.equal(rpc[0].args.payload.student_id,student.id)});
  await assert.rejects(()=>prod.adminSaveRoutineFull({student_id:'s',name:'Empty',days:[]}),/Completá/);passed++;console.log('PASS empty routine rejected');
- sb.rpc=async()=>({error:{code:'PGRST202',message:'missing'}});await assert.rejects(()=>prod.adminSaveRoutineFull(r),/005_v1_patch/);passed++;console.log('PASS missing migration produces explicit error');
+ sb.rpc=async()=>({error:{code:'PGRST202',message:'missing'}});await assert.rejects(()=>prod.adminSaveRoutineFull(r),/008_edicion_rutinas/);passed++;console.log('PASS missing migration produces explicit error');
  console.log(`\n${passed} regression checks passed. SQL/live auth/browser not covered.`);
 })().catch(e=>{console.error(e);process.exit(1)});
